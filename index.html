@@ -2,940 +2,421 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>رفيق الدراسة الذكي - تتبع التقدم اليومي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>رفيق الدراسة الذكي - النسخة الكاملة</title>
     <style>
-        :root {
-            --primary: #facc15;
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --danger: #ef4444;
-            --success: #10b981;
-            --accent: #6366f1;
-            --info: #38bdf8;
-            --warning: #f59e0b;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        input, textarea { user-select: text; }
 
         body {
-            background: var(--bg-dark);
-            background-attachment: fixed;
-            color: #f8fafc;
-            margin: 0;
-            padding: env(safe-area-inset-top) 15px 40px 15px;
-            min-height: 100vh;
+            background: #0b1120;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 20px 16px 80px;
+            color: #f1f5f9;
+            line-height: 1.5;
         }
 
-        .app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding-top: 20px;
-        }
+        .app-container { max-width: 600px; margin: 0 auto; }
 
-        .app-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .app-header h1 {
+        .hero { text-align: center; margin-bottom: 28px; }
+        .hero h1 {
             font-size: 1.8rem;
-            margin: 0;
-            color: var(--primary);
+            background: linear-gradient(135deg, #FFD966, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
         }
 
-        .notification-banner {
-            background: rgba(99, 102, 241, 0.2);
-            border: 1px solid var(--accent);
-            padding: 12px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+        .subjects-grid { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
 
-        .exams-list {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .exam-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 32px;
-            padding: 25px;
-            position: relative;
-            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
+        /* تعديل المربع الأول حسب الطلب */
+        .subject-window {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 28px;
+            padding: 25px 20px;
+            border: 1px solid rgba(250, 204, 21, 0.2);
             text-align: center;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .exam-name-input {
-            background: transparent;
-            border: none;
-            border-bottom: 2px dashed rgba(250, 204, 21, 0.4);
-            color: white;
-            padding: 8px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.4rem;
-            width: 85%;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(239, 68, 68, 0.15);
-            border: none;
-            color: var(--danger);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
+            display: block;
             cursor: pointer;
-            font-size: 1.2rem;
         }
 
-        .main-counter {
-            margin: 15px 0;
-            padding: 5px;
-        }
-
-        .days-value {
+        .subject-name-display { 
+            font-size: 1.8rem; 
+            font-weight: 900; 
+            color: #FFD966; 
             display: block;
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--primary);
-            line-height: 1;
-            text-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
-        }
-
-        .days-label {
-            font-size: 1rem;
-            color: #94a3b8;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .stat-item {
-            background: rgba(0,0,0,0.4);
-            padding: 15px 10px;
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stat-item label {
-            display: block;
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .stat-item input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            width: 100%;
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        .time-input-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            color: var(--primary);
-            font-size: 1.3rem;
-            font-weight: bold;
-            direction: ltr;
-        }
-
-        .time-input-group input {
-            width: 55px;
-            padding: 8px;
-            font-size: 1.3rem;
-            color: var(--primary);
-            text-align: center;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(250,204,21,0.4);
-            border-radius: 12px;
-        }
-
-        /* أقسام الإنجاز والمتبقي - تكبير الخط */
-        .progress-stats {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 8px;
             margin-bottom: 5px;
         }
-        .achieved-badge, .remaining-badge {
-            background: rgba(16, 185, 129, 0.15);
-            border-radius: 16px;
-            padding: 8px 5px;
-            flex: 1;
-            text-align: center;
-        }
-        .remaining-badge {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .achieved-label, .remaining-label {
-            font-size: 0.7rem;
-            color: #94a3b8;
+        .days-highlight { 
+            color: #10b981; 
+            font-size: 2.2rem; 
+            font-weight: 900;
             display: block;
         }
-        .achieved-value, .remaining-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            display: block;
-            margin-top: 4px;
-        }
-        .achieved-value { color: var(--success); }
-        .remaining-value { color: var(--warning); }
 
-        .daily-plan-box {
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 24px;
+        .btn-add {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            width: 100%;
             padding: 18px;
-            margin-bottom: 15px;
-            text-align: right;
-        }
-
-        .progress-section {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 24px;
-            padding: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        .plan-title {
-            color: var(--info);
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: block;
-            text-align: center;
-        }
-
-        .plan-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-        }
-
-        .plan-value {
-            color: var(--success);
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .buffer-input-group {
-            margin-top: 12px;
-            font-size: 0.8rem;
-            color: #94a3b8;
-            text-align: center;
-        }
-
-        .buffer-input-group input {
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: var(--primary);
-            width: 50px;
-            border-radius: 8px;
-            text-align: center;
-            padding: 5px;
-        }
-
-        .progress-title {
-            color: var(--success);
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .progress-inputs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 12px;
-        }
-
-        .progress-field {
-            background: #0f172a;
-            padding: 10px 12px;
             border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            min-width: 110px;
-        }
-
-        .progress-field label {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            font-weight: bold;
-        }
-
-        .progress-field input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            width: 70px;
-            text-align: center;
             font-size: 1.1rem;
             font-weight: bold;
-        }
-
-        .submit-progress-btn {
-            background: var(--success);
-            border: none;
             color: white;
-            padding: 12px;
-            border-radius: 28px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 12px;
+            box-shadow: 0 4px 15px rgba(16,185,129,0.2);
+            margin-bottom: 20px;
         }
 
-        .undo-progress-btn {
-            background: rgba(245, 158, 11, 0.2);
-            border: 1px solid var(--warning);
-            color: var(--warning);
-            padding: 8px 12px;
-            border-radius: 28px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-weight: bold;
-        }
-
-        .date-footer {
-            margin-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding-top: 15px;
-        }
-
-        .date-footer input {
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-        }
-
-        .list-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-            padding-bottom: 50px;
-        }
-
-        .btn {
-            border: none;
-            padding: 16px;
-            border-radius: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
-        }
-
-        .btn-primary { 
-            background: var(--success); 
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-primary:active { transform: scale(0.98); }
-
-        .btn-notif { background: var(--accent); color: white; font-size: 0.85rem; padding: 8px 15px; border-radius: 12px; }
-
-        .modal {
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            padding: 20px;
+            padding: 15px;
         }
-
-        .modal-content {
+        .details-card {
             background: #1e293b;
-            padding: 25px;
-            border-radius: 28px;
-            text-align: center;
+            border-radius: 32px;
             width: 100%;
-            max-width: 350px;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            border: 1px solid #facc1533;
         }
 
-        .toast-msg {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--success);
+        .section-box {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            display: block;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 5px;
+        }
+
+        .row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 0.95rem; }
+        .val { color: #facc15; font-weight: bold; }
+        .val-green { color: #10b981; font-weight: bold; }
+
+        input[type="number"], input[type="text"], input[type="date"] {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 12px;
             color: white;
-            padding: 12px 24px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            z-index: 1100;
-            animation: fadeOut 2s ease forwards;
-            font-weight: bold;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
         }
 
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
+        .time-input-group { display: flex; gap: 10px; direction: ltr; }
+
+        .btn-submit { background: #facc15; color: #0f172a; padding: 14px; border-radius: 15px; border: none; font-weight: bold; flex: 2; }
+        .btn-undo { background: #334155; color: #cbd5e1; padding: 14px; border-radius: 15px; border: none; flex: 1; }
+        .btn-delete { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 10px; border-radius: 12px; width: 100%; margin-top: 20px; font-weight: bold; }
+        .btn-save { background: #10b981; color: white; padding: 15px; border-radius: 15px; border: none; width: 100%; font-weight: bold; margin-top: 15px; }
+
+        .close-btn { background: #334155; border: none; color: white; width: 36px; height: 36px; border-radius: 50%; }
+
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #10b981; padding: 10px 20px; border-radius: 50px; font-size: 0.85rem; z-index: 5000;
         }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="app-header">
-        <h1>🎓 رفيق الدراسة الذكي</h1>
-        <p>سجل تقدمك اليومي وسيُخصم تلقائياً</p>
+    <div class="hero">
+        <h1>📚 رفيق الدراسة</h1>
+        <p>تتبع إنجازك بذكاء</p>
     </div>
 
-    <div id="notifBanner" class="notification-banner">
-        <span>🔔 فعل الإشعارات لتصلك تذكيرات يومية</span>
-        <button onclick="requestNotifPermission()" class="btn btn-notif">تفعيل الإشعارات</button>
-    </div>
+    <div id="subjectsGrid" class="subjects-grid"></div>
 
-    <div id="examsList" class="exams-list"></div>
-
-    <div class="list-controls">
-        <button id="addExamBtn" class="btn btn-primary">➕ إضافة مادة جديدة</button>
-        <button id="resetAllBtn" style="background:none; color:#64748b; border:none; font-size:0.8rem; cursor:pointer; text-decoration:underline;">إعادة ضبط كل البيانات</button>
+    <button onclick="addNewSubject()" class="btn-add">➕ إضافة مادة جديدة</button>
+    <div style="text-align: center;">
+        <span onclick="resetAll()" style="color:#475569; font-size: 0.7rem; text-decoration: underline; cursor:pointer;">إعادة ضبط كافة البيانات</span>
     </div>
 </div>
 
-<div id="confirmModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">تنبيه</h3>
-        <p id="modalMsg"></p>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:16px; border:none; background:#475569; color:white;">إلغاء</button>
-            <button id="confirmActionBtn" style="flex:1; padding:12px; border-radius:16px; border:none; background:var(--danger); color:white;">تأكيد</button>
-        </div>
+<div id="detailsModal" class="modal-overlay">
+    <div class="details-card" id="detailsCard"></div>
+</div>
+
+<div id="settingsModal" class="modal-overlay">
+    <div class="details-card">
+        <h3 style="margin-bottom: 15px; color:#facc15;">⚙️ إعدادات المادة</h3>
+        <div id="settingsContent"></div>
+        <button onclick="closeSettings()" class="btn-undo" style="width:100%; margin-top:10px;">إلغاء</button>
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = "v_final_study_tracker_v5";
-    let exams = [];
-    let progressHistory = {};
+    const STORAGE_KEY = "study_app_v13_logic_fix";
+    let subjects = [];
+    let historyStack = {};
 
-    function save() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(exams));
-    }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(subjects)); }
 
     function load() {
-        const data = localStorage.getItem(STORAGE_KEY);
-        exams = data ? JSON.parse(data) : [];
-        if(exams.length === 0) {
-            exams = [{ 
-                id: Date.now(), 
-                name: "مادة الرياضيات", 
-                date: new Date(Date.now() + 864000000).toISOString().split('T')[0],
-                sheets: 10,
-                hours: 15,
-                minutes: 0,
-                bufferDays: 2,
-                studiedSheets: 0,
-                studiedHours: 0,
-                studiedMinutes: 0,
-                lastProgressDate: null
-            }];
-            save();
-        }
-        exams.forEach(exam => {
-            if (!progressHistory[exam.id]) progressHistory[exam.id] = [];
-        });
+        const raw = localStorage.getItem(STORAGE_KEY);
+        subjects = raw ? JSON.parse(raw) : [];
+        subjects.forEach(s => { if(!historyStack[s.id]) historyStack[s.id] = []; });
     }
 
-    function getDays(date) {
-        const diff = new Date(date).setHours(0,0,0,0) - new Date().setHours(0,0,0,0);
-        return Math.ceil(diff / 86400000);
+    function getDaysBetween(d1, d2) {
+        let date1 = new Date(d1); date1.setHours(0,0,0,0);
+        let date2 = new Date(d2); date2.setHours(0,0,0,0);
+        return Math.ceil((date1 - date2) / 86400000);
     }
 
-    function getRemainingSheets(exam) {
-        return Math.max(0, (parseInt(exam.sheets) || 0) - (parseInt(exam.studiedSheets) || 0));
+    function calculateFinishDate(examDate, reviewDays) {
+        let d = new Date(examDate);
+        d.setDate(d.getDate() - reviewDays);
+        return d.toISOString().split('T')[0];
     }
 
-    function getRemainingMinutes(exam) {
-        const totalMinutes = ((parseInt(exam.hours) || 0) * 60) + (parseInt(exam.minutes) || 0);
-        const studiedMinutes = ((parseInt(exam.studiedHours) || 0) * 60) + (parseInt(exam.studiedMinutes) || 0);
-        return Math.max(0, totalMinutes - studiedMinutes);
-    }
-
-    function getRemainingHoursAndMinutes(exam) {
-        let remMinutes = getRemainingMinutes(exam);
-        let h = Math.floor(remMinutes / 60);
-        let m = remMinutes % 60;
-        return { hours: h, minutes: m };
-    }
-
-    function calculateDailyTarget(exam) {
-        const totalDays = getDays(exam.date);
-        const studyDays = totalDays - (exam.bufferDays || 0);
-        if (studyDays <= 0) return { sheets: "انتهى الوقت", time: "انتهى الوقت" };
-        const remainingSheets = getRemainingSheets(exam);
-        const remainingMinutes = getRemainingMinutes(exam);
-        const dailySheets = remainingSheets / studyDays;
-        const dailyMinutes = remainingMinutes / studyDays;
-        const h = Math.floor(dailyMinutes / 60);
-        const m = Math.round(dailyMinutes % 60);
-        return { sheets: dailySheets.toFixed(1), time: `${h} س و ${m} د` };
-    }
-
-    function formatTimeValue(val) {
-        return String(val).padStart(2, '0');
-    }
-
-    function recordProgress(examId, studiedSheets, studiedHours, studiedMinutes) {
-        const idx = exams.findIndex(e => e.id == examId);
-        if (idx === -1) return false;
-        const exam = exams[idx];
-        
-        let addSheets = Math.max(0, parseInt(studiedSheets) || 0);
-        let addHours = Math.max(0, parseInt(studiedHours) || 0);
-        let addMinutes = Math.max(0, parseInt(studiedMinutes) || 0);
-        
-        if (addSheets === 0 && addHours === 0 && addMinutes === 0) return false;
-        
-        const currentState = {
-            studiedSheets: exam.studiedSheets,
-            studiedHours: exam.studiedHours,
-            studiedMinutes: exam.studiedMinutes
-        };
-        if (!progressHistory[examId]) progressHistory[examId] = [];
-        progressHistory[examId].push(currentState);
-        
-        exam.studiedSheets = (parseInt(exam.studiedSheets) || 0) + addSheets;
-        let totalStudiedMinutes = ((parseInt(exam.studiedHours) || 0) * 60) + (parseInt(exam.studiedMinutes) || 0);
-        totalStudiedMinutes += (addHours * 60) + addMinutes;
-        exam.studiedHours = Math.floor(totalStudiedMinutes / 60);
-        exam.studiedMinutes = totalStudiedMinutes % 60;
-        exam.lastProgressDate = new Date().toISOString();
-        save();
-        return true;
-    }
-
-    function undoProgressWithConfirm(examId) {
-        const idx = exams.findIndex(e => e.id == examId);
-        if (idx === -1) return;
-        if (!progressHistory[examId] || progressHistory[examId].length === 0) {
-            showToast("⚠️ لا توجد خطوة سابقة للتراجع");
+    function renderMain() {
+        const grid = document.getElementById('subjectsGrid');
+        grid.innerHTML = '';
+        if (subjects.length === 0) {
+            grid.innerHTML = '<div class="empty-state">لا توجد مواد مضافة حالياً.</div>';
             return;
         }
-        showModal("تأكيد التراجع", "هل تريد التراجع عن آخر إضافة تم تسجيلها؟", () => {
-            const lastState = progressHistory[examId].pop();
-            exams[idx].studiedSheets = lastState.studiedSheets;
-            exams[idx].studiedHours = lastState.studiedHours;
-            exams[idx].studiedMinutes = lastState.studiedMinutes;
-            save();
-            render();
-            showToast("↩️ تم التراجع عن آخر إضافة");
-        });
-    }
-
-    function showToast(msg) {
-        let toast = document.createElement('div');
-        toast.className = 'toast-msg';
-        toast.innerText = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
-
-    // إشعارات الهاتف
-    window.requestNotifPermission = () => {
-        if (!("Notification" in window)) {
-            showToast("المتصفح لا يدعم الإشعارات");
-            return;
-        }
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                document.getElementById('notifBanner').style.display = 'none';
-                startNotificationLoop();
-                showToast("✅ تم تفعيل الإشعارات بنجاح");
-                new Notification("مرحباً في رفيق الدراسة 🎓", { body: "سنساعدك على تنظيم وقتك!", icon: "https://cdn-icons-png.flaticon.com/512/2997/2997300.png" });
-            } else {
-                showToast("❌ لم يتم تفعيل الإشعارات");
-            }
-        });
-    };
-
-    function sendProgressQuestion(examName) {
-        if (Notification.permission !== "granted") return;
-        const notifMessages = {
-            query: ["🤔 كم شيت أنجزت اليوم في {name}؟", "📚 مادة {name} تنتظرك، كم ساعة درست اليوم؟", "✍️ هل سجلت تقدمك اليوم في {name}؟"]
-        };
-        const queryMsg = notifMessages.query[Math.floor(Math.random() * notifMessages.query.length)].replace('{name}', examName);
-        new Notification("📖 سجل تقدمك اليومي", { body: queryMsg, icon: "https://cdn-icons-png.flaticon.com/512/2997/2997300.png" });
-    }
-
-    let notificationInterval = null;
-    function startNotificationLoop() {
-        if (notificationInterval) clearInterval(notificationInterval);
-        notificationInterval = setInterval(() => {
-            if (exams.length === 0) return;
-            const nearest = exams[0];
-            const daysLeft = getDays(nearest.date);
-            if (daysLeft >= 0 && daysLeft <= 3) {
-                new Notification("⚠️ تنبيه عاجل", { body: `الامتحان بعد ${daysLeft} يوم! راجع مادة ${nearest.name}`, icon: "https://cdn-icons-png.flaticon.com/512/2997/2997300.png" });
-            } else {
-                sendProgressQuestion(nearest.name);
-            }
-        }, 3600000);
-        scheduleDailyNotifications();
-    }
-    
-    function scheduleDailyNotifications() {
-        const now = new Date();
-        const morning = new Date(now);
-        morning.setHours(9, 0, 0, 0);
-        const evening = new Date(now);
-        evening.setHours(20, 0, 0, 0);
-        if (now > morning) morning.setDate(morning.getDate() + 1);
-        if (now > evening) evening.setDate(evening.getDate() + 1);
-        
-        setTimeout(() => {
-            if (exams.length && Notification.permission === "granted") {
-                new Notification("🌅 صباح النشاط!", { body: "لا تنسى تسجيل ما ستدرسه اليوم.", icon: "https://cdn-icons-png.flaticon.com/512/2997/2997300.png" });
-            }
-            scheduleDailyNotifications();
-        }, morning.getTime() - now.getTime());
-        
-        setTimeout(() => {
-            if (exams.length && Notification.permission === "granted") {
-                new Notification("🌙 مساء الإنجاز!", { body: "كم أنجزت اليوم؟ سجل تقدمك الآن.", icon: "https://cdn-icons-png.flaticon.com/512/2997/2997300.png" });
-            }
-        }, evening.getTime() - now.getTime());
-    }
-
-    function render() {
-        const list = document.getElementById('examsList');
-        list.innerHTML = '';
-        
-        exams.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        exams.forEach(exam => {
-            const days = getDays(exam.date);
-            const targets = calculateDailyTarget(exam);
-            const remainingSheets = getRemainingSheets(exam);
-            const remaining = getRemainingHoursAndMinutes(exam);
-            const totalSheetsOriginal = parseInt(exam.sheets) || 0;
-            const totalMinutesOriginal = (parseInt(exam.hours) || 0) * 60 + (parseInt(exam.minutes) || 0);
-            const studiedSheetsVal = parseInt(exam.studiedSheets) || 0;
-            const studiedHoursVal = parseInt(exam.studiedHours) || 0;
-            const studiedMinutesVal = parseInt(exam.studiedMinutes) || 0;
-            
-            let daysDisplay = days < 0 ? "✓" : days;
-            let labelDisplay = days < 0 ? "تم الامتحان" : days === 0 ? "اليوم هو الامتحان!" : "أيام متبقية";
-            let daysColor = days <= 3 && days >= 0 ? "var(--danger)" : "var(--primary)";
-
+        subjects.sort((a,b) => getDaysBetween(a.examDate, new Date()) - getDaysBetween(b.examDate, new Date()));
+        subjects.forEach(sub => {
+            let days = getDaysBetween(sub.examDate, new Date());
             const card = document.createElement('div');
-            card.className = 'exam-card';
+            card.className = 'subject-window';
+            card.onclick = () => openDetails(sub.id);
             card.innerHTML = `
-                <button class="delete-btn" onclick="deleteExam('${exam.id}')">✕</button>
-                
-                <div class="card-header">
-                    <input type="text" class="exam-name-input" value="${exam.name}" onchange="updateExam('${exam.id}', 'name', this.value)" placeholder="اسم المادة">
-                </div>
-
-                <div class="main-counter">
-                    <span class="days-value" style="color: ${daysColor}">${daysDisplay}</span>
-                    <div class="days-label">${labelDisplay}</div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <label>📄 إجمالي الشيتات المطلوبة</label>
-                        <input type="number" value="${exam.sheets || 0}" onchange="updateExam('${exam.id}', 'sheets', this.value)" placeholder="عدد الشيتات">
-                        <div class="progress-stats">
-                            <div class="achieved-badge">
-                                <span class="achieved-label">✅ أنجزت</span>
-                                <span class="achieved-value">${studiedSheetsVal} شيت</span>
-                            </div>
-                            <div class="remaining-badge">
-                                <span class="remaining-label">📊 متبقي</span>
-                                <span class="remaining-value">${remainingSheets} شيت</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <label>🎬 إجمالي ساعات المحاضرات المطلوبة</label>
-                        <div class="time-input-group">
-                            <input type="number" id="hoursInput_${exam.id}" value="${exam.hours || 0}" onchange="updateExamTime('${exam.id}', 'hours', this.value)" min="0" max="999">
-                            <span>:</span>
-                            <input type="number" id="minsInput_${exam.id}" value="${formatTimeValue(exam.minutes || 0)}" onchange="updateExamTime('${exam.id}', 'minutes', this.value)" min="0" max="59">
-                        </div>
-                        <div class="progress-stats">
-                            <div class="achieved-badge">
-                                <span class="achieved-label">✅ أنجزت</span>
-                                <span class="achieved-value">${studiedHoursVal} س ${studiedMinutesVal} د</span>
-                            </div>
-                            <div class="remaining-badge">
-                                <span class="remaining-label">⏳ متبقي</span>
-                                <span class="remaining-value">${remaining.hours} س ${remaining.minutes} د</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="daily-plan-box">
-                    <span class="plan-title">🎯 المطلوب منك يومياً للإنجاز (حسب المتبقي)</span>
-                    <div class="plan-item">
-                        <span>دراسة شيتات:</span>
-                        <span class="plan-value">${targets.sheets} شيت</span>
-                    </div>
-                    <div class="plan-item">
-                        <span>حضور محاضرات:</span>
-                        <span class="plan-value">${targets.time}</span>
-                    </div>
-                    <div class="buffer-input-group">
-                        🗓️ أريد الانتهاء قبل الامتحان بـ 
-                        <input type="number" value="${exam.bufferDays || 0}" onchange="updateExam('${exam.id}', 'bufferDays', this.value)"> 
-                        أيام
-                    </div>
-                </div>
-
-                <div class="progress-section">
-                    <div class="progress-title">
-                        <span>✨ سجل ما درسته اليوم (سيُخصم تلقائياً)</span>
-                    </div>
-                    <div class="progress-inputs">
-                        <div class="progress-field">
-                            <label>📚 شيتات</label>
-                            <input type="number" id="dailySheets_${exam.id}" placeholder="0" min="0" value="0">
-                        </div>
-                        <div class="progress-field">
-                            <label>⏱ ساعات</label>
-                            <input type="number" id="dailyHours_${exam.id}" placeholder="0" min="0" value="0">
-                        </div>
-                        <div class="progress-field">
-                            <label>⏱ دقائق</label>
-                            <input type="number" id="dailyMins_${exam.id}" placeholder="0" min="0" max="59" value="0">
-                        </div>
-                    </div>
-                    <button class="submit-progress-btn" onclick="submitProgress('${exam.id}')">✅ تسجيل التقدم وخصمه</button>
-                    <button class="undo-progress-btn" onclick="undoProgressWithConfirm('${exam.id}')">↩️ تراجع</button>
-                </div>
-
-                <div class="date-footer">
-                    <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:8px;">📅 موعد الامتحان:</label>
-                    <input type="date" value="${exam.date}" onchange="updateExam('${exam.id}', 'date', this.value)">
-                </div>
+                <span class="subject-name-display">${escapeHtml(sub.name)}</span>
+                <span class="days-highlight">${days >= 0 ? days : 0}</span>
             `;
-            list.appendChild(card);
+            grid.appendChild(card);
         });
-
-        if (Notification.permission === "granted") {
-            const banner = document.getElementById('notifBanner');
-            if (banner) banner.style.display = 'none';
-        }
     }
 
-    window.updateExamTime = (id, field, val) => {
-        const idx = exams.findIndex(e => e.id == id);
-        if (idx === -1) return;
-        let numericVal = parseInt(val) || 0;
-        if (field === 'minutes') numericVal = Math.min(59, Math.max(0, numericVal));
-        exams[idx][field] = numericVal;
-        const newTotalMinutes = ((parseInt(exams[idx].hours) || 0) * 60) + (parseInt(exams[idx].minutes) || 0);
-        let studiedTotal = ((parseInt(exams[idx].studiedHours) || 0) * 60) + (parseInt(exams[idx].studiedMinutes) || 0);
-        if (studiedTotal > newTotalMinutes) {
-            exams[idx].studiedHours = Math.floor(newTotalMinutes / 60);
-            exams[idx].studiedMinutes = newTotalMinutes % 60;
-        }
-        save();
-        render();
-    };
-
-    window.updateExam = (id, field, val) => {
-        const idx = exams.findIndex(e => e.id == id);
-        if (idx === -1) return;
-        if (field === 'sheets' || field === 'bufferDays') {
-            exams[idx][field] = Math.max(0, parseInt(val) || 0);
-        } else if (field === 'name' || field === 'date') {
-            exams[idx][field] = val;
-        }
-        if (field === 'sheets') {
-            const newSheetsTotal = parseInt(exams[idx].sheets) || 0;
-            if ((exams[idx].studiedSheets || 0) > newSheetsTotal) {
-                exams[idx].studiedSheets = newSheetsTotal;
-            }
-        }
-        save();
-        render();
-    };
-
-    window.submitProgress = (examId) => {
-        const idx = exams.findIndex(e => e.id == examId);
-        if (idx === -1) return;
-        const exam = exams[idx];
-        const sheetsInput = document.getElementById(`dailySheets_${examId}`);
-        const hoursInput = document.getElementById(`dailyHours_${examId}`);
-        const minsInput = document.getElementById(`dailyMins_${examId}`);
+    function openDetails(id) {
+        const sub = subjects.find(s => s.id === id);
+        const modal = document.getElementById('detailsModal');
+        const card = document.getElementById('detailsCard');
         
-        let sheetsVal = parseInt(sheetsInput.value) || 0;
-        let hoursVal = parseInt(hoursInput.value) || 0;
-        let minsVal = parseInt(minsInput.value) || 0;
-        if (minsVal > 59) minsVal = 59;
-        if (sheetsVal === 0 && hoursVal === 0 && minsVal === 0) {
-            showToast("⚠️ الرجاء إدخال قيمة للتقدم");
-            return;
-        }
-        
-        const remainingSheets = getRemainingSheets(exam);
-        if (sheetsVal > remainingSheets) {
-            showToast(`⚠️ لا يمكن تسجيل أكثر من ${remainingSheets} شيت متبقي`);
-            return;
-        }
-        const remainingMinutes = getRemainingMinutes(exam);
-        const newStudyMinutes = (hoursVal * 60) + minsVal;
-        if (newStudyMinutes > remainingMinutes) {
-            showToast(`⚠️ لا يمكن تسجيل وقت دراسة أكثر من المتبقي (${Math.floor(remainingMinutes/60)} س ${remainingMinutes%60} د)`);
-            return;
-        }
-        
-        const success = recordProgress(examId, sheetsVal, hoursVal, minsVal);
-        if (success) {
-            showToast(`🎉 تم خصم ${sheetsVal} شيت و ${hoursVal} س ${minsVal} د من ${exam.name}`);
-            sheetsInput.value = 0;
-            hoursInput.value = 0;
-            minsInput.value = 0;
-            render();
-            if (Notification.permission === "granted") {
-                new Notification("🎉 أحسنت!", { body: `استمر في التفوق في ${exam.name}`, icon: "https://cdn-icons-png.flaticon.com/512/2997/2997300.png" });
-            }
-        } else {
-            showToast("حدث خطأ، حاول مجدداً");
-        }
-    };
+        const actualFinishDate = calculateFinishDate(sub.examDate, sub.reviewDaysBefore);
+        const today = new Date();
+        const daysToFinish = getDaysBetween(actualFinishDate, today);
+        const activeDays = daysToFinish > 0 ? daysToFinish : 1;
 
-    window.deleteExam = (id) => {
-        showModal('حذف مادة', 'هل تريد حذف هذه المادة وجميع تقدمها؟', () => {
-            exams = exams.filter(e => e.id != id);
-            delete progressHistory[id];
-            save();
-            render();
-        });
-    };
+        const totalMins = (sub.totalHours * 60) + sub.totalMinutes;
+        const doneMins = (sub.studiedHours * 60) + sub.studiedMinutes;
+        // الوقت المتبقي هو ما يهم الطالب الآن
+        const remMins = Math.max(0, totalMins);
+        
+        const remSheets = Math.max(0, sub.totalSheets - sub.studiedSheets);
+        
+        const dailySheets = (remSheets / activeDays).toFixed(1);
+        const dailyMins = totalMins / activeDays;
+        const dailyH = Math.floor(dailyMins / 60);
+        const dailyM = Math.round(dailyMins % 60);
 
-    const modal = document.getElementById('confirmModal');
-    let onConfirm = null;
-    function showModal(title, msg, action) {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalMsg').innerText = msg;
+        card.innerHTML = `
+            <div class="details-header">
+                <h2 style="color:#facc15;">${escapeHtml(sub.name)}</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+
+            <div class="section-box">
+                <span class="section-title">📊 الحالة الحالية</span>
+                <div class="row"><span>الشيتات المنجزة:</span><span class="val">${sub.studiedSheets} / ${sub.totalSheets}</span></div>
+                <div class="row"><span>المتبقي للإنجاز (ساعات):</span><span class="val">${sub.totalHours}س ${sub.totalMinutes}د</span></div>
+                <div class="row"><span>إجمالي ما ذاكرته:</span><span class="val-green">${sub.studiedHours}س ${sub.studiedMinutes}د</span></div>
+            </div>
+
+            <div class="section-box">
+                <span class="section-title">🎯 المطلوب إنجازه يومياً</span>
+                <div class="row"><span>شيتات:</span><span class="val-green">${dailySheets} شيت</span></div>
+                <div class="row"><span>ساعات:</span><span class="val-green">${dailyH}س و ${dailyM}د</span></div>
+                <div class="row"><span>الأيام المتبقية للإنجاز:</span><span class="val">${activeDays} أيام</span></div>
+            </div>
+
+            <div class="section-box" style="border: 1px dashed #facc1555;">
+                <p style="font-weight:bold; margin-bottom:10px; font-size:0.9rem;">✨ إضافة إنجاز (سيتم طرح الوقت تلقائياً):</p>
+                <div class="row" style="flex-direction:column; gap:10px;">
+                    <label style="font-size:0.8rem; color:#94a3b8;">شيتات خلصتها:</label>
+                    <input type="number" id="progSheets" value="0" onfocus="this.select()">
+                    
+                    <label style="font-size:0.8rem; color:#94a3b8;">وقت المذاكرة الحالي:</label>
+                    <div class="time-input-group">
+                        <input type="number" id="progHours" value="0" placeholder="ساعة" onfocus="this.select()">
+                        <input type="number" id="progMins" value="0" max="59" placeholder="دقيقة" onfocus="this.select()" oninput="if(this.value>59)this.value=59">
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button class="btn-submit" onclick="submitProgress(${sub.id})">تسجيل وخصم الوقت</button>
+                    <button class="btn-undo" onclick="confirmUndo(${sub.id})">تراجع</button>
+                </div>
+            </div>
+
+            <button class="btn-undo" style="width:100%;" onclick="openSettings(${sub.id})">⚙️ إعدادات المادة والمراجعة</button>
+            <button class="btn-delete" onclick="deleteSubject(${sub.id})">حذف المادة</button>
+        `;
         modal.style.display = 'flex';
-        onConfirm = action;
     }
-    function closeModal() { modal.style.display = 'none'; }
-    document.getElementById('confirmActionBtn').onclick = () => { if(onConfirm) onConfirm(); closeModal(); };
 
-    document.getElementById('addExamBtn').onclick = () => {
-        const newId = Date.now();
-        exams.push({ 
-            id: newId, 
-            name: "مادة جديدة", 
-            date: new Date(Date.now() + 14*86400000).toISOString().split('T')[0], 
-            sheets: 0, 
-            hours: 0, 
-            minutes: 0,
-            bufferDays: 1,
+    function submitProgress(id) {
+        const sub = subjects.find(s => s.id === id);
+        let s = parseInt(document.getElementById('progSheets').value) || 0;
+        let h = parseInt(document.getElementById('progHours').value) || 0;
+        let m = parseInt(document.getElementById('progMins').value) || 0;
+
+        if(!historyStack[id]) historyStack[id] = [];
+        historyStack[id].push(JSON.parse(JSON.stringify(sub)));
+
+        // 1. زيادة الشيتات المنجزة
+        sub.studiedSheets += s;
+
+        // 2. تحديث سجل ما ذاكرته فعلياً
+        let historyMins = (sub.studiedHours * 60) + sub.studiedMinutes + (h * 60) + m;
+        sub.studiedHours = Math.floor(historyMins / 60);
+        sub.studiedMinutes = historyMins % 60;
+
+        // 3. طرح الوقت المنجز من الوقت الكلي المتبقي (المطلوب من الطالب)
+        let remainingMins = (sub.totalHours * 60) + sub.totalMinutes - (h * 60) - m;
+        if (remainingMins < 0) remainingMins = 0;
+        sub.totalHours = Math.floor(remainingMins / 60);
+        sub.totalMinutes = remainingMins % 60;
+
+        save();
+        openDetails(id);
+        showToast("تم تحديث الإنجاز وخصم الوقت");
+    }
+
+    function confirmUndo(id) {
+        if (!historyStack[id] || historyStack[id].length === 0) {
+            showToast("لا يوجد عمليات للتراجع عنها");
+            return;
+        }
+        if (confirm("هل تريد التراجع عن آخر عملية تسجيل؟")) {
+            const lastState = historyStack[id].pop();
+            const index = subjects.findIndex(s => s.id === id);
+            subjects[index] = lastState;
+            save();
+            openDetails(id);
+            showToast("تم التراجع");
+        }
+    }
+
+    function openSettings(id) {
+        const sub = subjects.find(s => s.id === id);
+        const modal = document.getElementById('settingsModal');
+        const content = document.getElementById('settingsContent');
+
+        content.innerHTML = `
+            <div class="row" style="flex-direction:column; gap:12px;">
+                <label>اسم المادة</label>
+                <input type="text" id="setName" value="${escapeHtml(sub.name)}">
+                
+                <label>تاريخ الامتحان</label>
+                <input type="date" id="setDate" value="${sub.examDate}">
+
+                <label>بدّي أكمل قبل الامتحان بـ (عدد أيام):</label>
+                <input type="number" id="setReviewDays" value="${sub.reviewDaysBefore}" onfocus="this.select()">
+                
+                <label>إجمالي الشيتات المتبقية</label>
+                <input type="number" id="setSheets" value="${sub.totalSheets}" onfocus="this.select()">
+                
+                <label>الوقت المتبقي الكلي (ساعة : دقيقة)</label>
+                <div class="time-input-group">
+                    <input type="number" id="setHours" value="${sub.totalHours}" onfocus="this.select()">
+                    <input type="number" id="setMins" value="${sub.totalMinutes}" max="59" onfocus="this.select()" oninput="if(this.value>59)this.value=59">
+                </div>
+                
+                <button class="btn-save" onclick="saveSettings(${sub.id})">حفظ البيانات</button>
+            </div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    function saveSettings(id) {
+        const sub = subjects.find(s => s.id === id);
+        sub.name = document.getElementById('setName').value || "بدون اسم";
+        sub.examDate = document.getElementById('setDate').value;
+        sub.reviewDaysBefore = parseInt(document.getElementById('setReviewDays').value) || 0;
+        sub.totalSheets = parseInt(document.getElementById('setSheets').value) || 0;
+        sub.totalHours = parseInt(document.getElementById('setHours').value) || 0;
+        sub.totalMinutes = parseInt(document.getElementById('setMins').value) || 0;
+
+        save();
+        closeSettings();
+        openDetails(id);
+        renderMain();
+        showToast("تم الحفظ");
+    }
+
+    function addNewSubject() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const newSub = {
+            id: Date.now(),
+            name: "مادة جديدة",
+            examDate: todayStr,
+            reviewDaysBefore: 1,
+            totalSheets: 0,
+            totalHours: 0,
+            totalMinutes: 0,
             studiedSheets: 0,
             studiedHours: 0,
-            studiedMinutes: 0,
-            lastProgressDate: null
-        });
-        progressHistory[newId] = [];
+            studiedMinutes: 0
+        };
+        subjects.push(newSub);
+        historyStack[newSub.id] = [];
         save();
-        render();
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    };
-
-    document.getElementById('resetAllBtn').onclick = () => {
-        showModal('تنبيه', 'سيتم مسح كل المواد والتقدم، هل أنت متأكد؟', () => {
-            exams = [];
-            progressHistory = {};
-            save();
-            render();
-        });
-    };
-
-    load();
-    render();
-    if (Notification.permission === "granted") {
-        document.getElementById('notifBanner').style.display = 'none';
-        startNotificationLoop();
-    } else if (Notification.permission !== "denied") {
-        setTimeout(() => {
-            if (Notification.permission !== "granted") requestNotifPermission();
-        }, 3000);
+        renderMain();
+        openSettings(newSub.id);
     }
+
+    function deleteSubject(id) {
+        if(confirm("هل أنت متأكد من حذف هذه المادة؟")) {
+            subjects = subjects.filter(s => s.id !== id);
+            save(); closeModal(); renderMain();
+        }
+    }
+
+    function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+    function showToast(msg) {
+        const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
+        document.body.appendChild(t); setTimeout(() => t.remove(), 2000);
+    }
+    function resetAll() {
+        if(confirm("سيتم تصفير كل البيانات، هل أنت متأكد؟")) {
+            localStorage.removeItem(STORAGE_KEY); subjects = []; renderMain();
+        }
+    }
+    function escapeHtml(str) {
+        const div = document.createElement('div'); div.textContent = str; return div.innerHTML;
+    }
+
+    window.onload = () => { load(); renderMain(); };
 </script>
 </body>
 </html>
